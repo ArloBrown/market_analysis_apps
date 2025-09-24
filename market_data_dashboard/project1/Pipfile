@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+datetime = "*"
+requests = "*"
+numpy = "*"
+streamlit = "*"
+backtrader = "*"
+matplotlib = "*"
+yfinance = "*"
+seaborn = "*"
+statsmodels = "*"
+pandas = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
+python_full_version = "3.12.5"
