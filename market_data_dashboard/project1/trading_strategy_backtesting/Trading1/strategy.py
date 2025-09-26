@@ -13,10 +13,10 @@ plt.style.use('dark_background')
 plt.grid(alpha=0.3)
 
 
-# Larger fonts, cleaner layout
-sns.set_context("talk")  # options: paper, notebook, talk, poster
-plt.rcParams["figure.facecolor"] = "#0e1117"  # Streamlit dark theme bg
-plt.rcParams["axes.facecolor"] = "#0e1117"    # match Streamlit bg
+
+sns.set_context("talk") 
+plt.rcParams["figure.facecolor"] = "#0e1117" 
+plt.rcParams["axes.facecolor"] = "#0e1117"    
 plt.rcParams["axes.edgecolor"] = "white"
 plt.rcParams["axes.labelcolor"] = "white"
 plt.rcParams["xtick.color"] = "white"
@@ -32,7 +32,7 @@ st.title("EUR/USD Strategy Analysis")
 #Download EUR/USD data
 ticker = "EURUSD=X"
 df = yf.download(ticker, start="2015-01-01", interval="1d")
-df.drop(columns=["Volume"], inplace=True)  # Volume is useless for FX
+df.drop(columns=["Volume"], inplace=True)  
 df.dropna(inplace=True)
 print(df.head())
 st.write("EUR/USD Data Overview")
@@ -116,8 +116,8 @@ st.write(f"p-value: {adf_result[1]}")
 
 
 
-# 8. Time-of-Day & Day-of-Week Patterns
-# (Using daily data, we can only check day-of-week)
+# Time-of-Day & Day-of-Week Patterns
+
 df['DayOfWeek'] = df.index.day_name()
 dow_stats = df.groupby('DayOfWeek')['Return'].mean().sort_values()
 
@@ -133,7 +133,7 @@ plt.close()
 dxy = yf.download("DX-Y.NYB", start="2015-01-01", interval="1d")['Close']
 gold = yf.download("GC=F", start="2015-01-01", interval="1d")['Close']
 
-# Make sure each is a Series with a proper name
+
 eurusd = df['Close'].copy()
 eurusd.name = "EURUSD"
 
@@ -143,7 +143,7 @@ dxy.name = "DXY"
 gold = yf.download("GC=F", start="2015-01-01", interval="1d")['Close'].copy()
 gold.name = "Gold"
 
-# Concatenate on columns
+
 corr_df = pd.concat([eurusd, dxy, gold], axis=1).dropna()
 
 st.write("Correlation Data Overview")
