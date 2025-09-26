@@ -16,17 +16,17 @@ warnings.filterwarnings("ignore")
 
 #Collecting All Data
 
-#Specify our date ranges of interest
+
 start = "2015-01-01"
 end = "2025-01-01"
 
 #Yahoo Finance FX Pairs
-#Download our FX pairs values from Yahoo Finance
+
 fx_pairs = {
     "EURUSD": "EURUSD=X",
     "USDJPY": "JPY=X",
     "GBPUSD": "GBPUSD=X",
-    "DXY": "DX-Y.NYB"   # US Dollar Index
+    "DXY": "DX-Y.NYB"   
 }
 df_fx = yf.download(list(fx_pairs.values()), start=start, end=end)['Close']
 df_fx.rename(columns={v: k for k, v in fx_pairs.items()}, inplace=True)
@@ -35,7 +35,7 @@ df_fx.bfill(axis=0, inplace=True)
 
 
 #Yahoo Finance Indices
-#Download our major stock indices from Yahoo Finance
+
 indices = {
     "FTSE100": "^FTSE",
     "DAX30": "^GDAXI",
@@ -51,11 +51,11 @@ df_indices.rename(columns={v: k for k, v in indices.items()}, inplace=True)
 
 
 #Yahoo Financ Commodities
-#Download our major commodities from Yahoo Finance
+
 commodities = {
     "BrentOil": "BZ=F",
     "Gold": "GC=F",
-    "VIX": "^VIX"          # equity volatility index
+    "VIX": "^VIX"         
 }
 df_commodities = yf.download(list(commodities.values()), start=start, end=end)['Close']
 df_commodities.rename(columns={v: k for k, v in commodities.items()}, inplace=True)
@@ -144,16 +144,15 @@ st.dataframe(df_all)
 
 
 #Convert Price levels to Log Returns
-#We seperate our raw prices from our macro levels/yields because they need different processing. Changes in the raw prices of different assets are not directly comparable, A 5% move in EUR/USD is very different to a 5% move in the S&P500. Instead we convert all price series to log returns, which are more comparable across assets.
-#The yields and macro levels are already stationary or mean-reverting, meaning that it will fluctuate around a level. 
 
 
-# Identify which columns are price series (fx, indices, commodities)
+
+
 price_cols = ["EURUSD", "USDJPY", "GBPUSD", "DXY",
               "FTSE100", "DAX30", "S&P500", "NIKKEI225", "CAC40",
               "EUROSTOXX50", "MIB", "BrentOil", "Gold"]
 
-# Risk index (VIX) is usually used as a level, not return
+
 level_cols = ["VIX", "US10Y", "DE10Y", "FR10Y", "IT10Y", 
               "UK10Y", "JP10Y", "EC3M", "US3M", 
               "CPI_US", "CPI_EU"]
@@ -164,8 +163,8 @@ df_returns = np.log(df_all[price_cols]).diff()
 # Keep levels for yields, macro
 df_levels = df_all[level_cols]
 
-# Optional: Create spreads (highly relevant for FX)
-# The FX market responds to differences between US and EURO yields, if USY rises relative to German 10Y, EUR/USD might weakend as USD strengthens relative to EUR.
+# Create spreads 
+
 df_spreads = pd.DataFrame({
     "US10Y_DE10Y": df_all["US10Y"] - df_all["DE10Y"],
     "US3M_EC3M": df_all["US3M"] - df_all["EC3M"],
@@ -190,7 +189,7 @@ y = df_scaled["EURUSD"]                 # Target
 
 #PCA for Dimensionality Reduction
 from sklearn.decomposition import PCA
-pca = PCA(n_components=0.95)  # Retain 95% variance
+pca = PCA(n_components=0.95)  
 X = pca.fit_transform(X)
 
 #Splitting Data
@@ -207,7 +206,7 @@ y_pred = rf.predict(x_test)
 
 #Random Walk Baseline
 y_test_values = y_test.values
-y_pred_naive = y_test_values[:-1]        # Shift by 1
+y_pred_naive = y_test_values[:-1]        
 y_true_naive = y_test_values[1:]
 mse_naive = mean_squared_error(y_true_naive, y_pred_naive)
 r2_naive = r2_score(y_true_naive, y_pred_naive)  
@@ -243,10 +242,10 @@ import backtrader as bt
 
 threshold = 0.001
 signals = np.where(y_pred > threshold, 1,
-           np.where(y_pred < -threshold, -1, 0))  # 0 = hold
+           np.where(y_pred < -threshold, -1, 0)) 
 
 df_signals = pd.DataFrame({
-    "Close": df_all.loc[y_test.index, "EURUSD"],  # actual EUR/USD close prices
+    "Close": df_all.loc[y_test.index, "EURUSD"],  
     "Signal": signals
 }, index=y_test.index)
 
@@ -271,21 +270,21 @@ class MLStrategy(bt.Strategy):
             return
 
         sig = self.signals[self.index]
-        size = 1000  # stake per trade
+        size = 1000 
 
         # Trading logic
         if sig == 1:
-            if not self.position:  # no open position
+            if not self.position:  
                 self.buy(size=size)
-            elif self.position.size < 0:  # currently short → close short, go long
+            elif self.position.size < 0:  
                 self.close()
                 self.buy(size=size)
 
         # If signal says "go short"
         elif sig == -1:
-            if not self.position:  # no open position
+            if not self.position: 
                 self.sell(size=size)
-            elif self.position.size > 0:  # currently long → close long, go short
+            elif self.position.size > 0: 
                 self.close()
                 self.sell(size=size)
 
@@ -300,7 +299,7 @@ cerebro.adddata(data)
 # Broker settings
 cerebro.broker.set_cash(100000)
 cerebro.addsizer(bt.sizers.FixedSize, stake=1000)
-cerebro.broker.setcommission(commission=0.0002)  # ~2 pip spread
+cerebro.broker.setcommission(commission=0.0002)  
 
 
 # Run backtest
